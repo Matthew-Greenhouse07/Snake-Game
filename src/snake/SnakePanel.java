@@ -4,88 +4,58 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.Toolkit;
 import java.awt.event.*;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 
 public class SnakePanel extends JPanel implements KeyListener {
 
-    private int snakeLength;
-    private int currentX;
-    private int currentY;
     private boolean activeGame;
-    
-    enum Direction { UP, DOWN, LEFT, RIGHT };
-    private Direction direction;
-
     private Timer timer;
-
-    final int SQUARE_LENGTH = 30;
-
-    private int screenWidth;
-    private int screenHeight;
+    private Snake snake;
+    protected static final int SQUARE_LENGTH = 50;
+    protected static int screenWidth;
+    protected static int screenHeight;
 
     public SnakePanel() {
         // Toolkit retrieves system information
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenDimensions = toolkit.getScreenSize();
-        this.screenWidth = screenDimensions.width;
-        this.screenHeight = screenDimensions.height;
+        this.screenWidth = ((int) screenDimensions.width / SQUARE_LENGTH) * SQUARE_LENGTH;
+        this.screenHeight = ((int) screenDimensions.height / SQUARE_LENGTH) * SQUARE_LENGTH;
 
-        // Create the stage
+        // set up everything
         setupBackground();
+        setupRefreshRate(50);
+        addKeyListener(this);
+        setFocusable(true);
 
-        // Setup snake
-        this.snakeLength = 3;
-        this.currentX = screenWidth/4;
-        this.currentY = screenHeight/2;
-        this.direction = Direction.RIGHT;
+        this.snake = new Snake();
+    }
 
-        // Setting up the listeners
-        setupListeners();
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        snake.updateSnake();
+        snake.drawSnake(g2);
+    }
+    
 
-        // timer
-        timer = new Timer(50, e -> {
-            updateSnake();
+//#region "set up events"
+    protected void setupBackground() {
+        setBackground(Color.BLACK);
+        setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), SQUARE_LENGTH));
+    }
+
+    protected void setupRefreshRate(int rate) {
+        timer = new Timer(rate, e -> {
             repaint();
         });
 
         timer.start();
     }
 
-    protected void setupBackground() {
-        setBackground(Color.BLACK);
-        setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 30));
-    }
-
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
-
-        g2.setColor(Color.GREEN);
-        g2.fillRect(currentX, currentY, SQUARE_LENGTH, SQUARE_LENGTH);
-    }
-
-    protected void updateSnake() {
-        switch ( direction ) {
-            case UP -> currentY -= 30;
-            case DOWN -> currentY += 30;
-            case LEFT -> currentX -= 30;
-            case RIGHT -> currentX += 30;
-        }
-    }
-
-    protected void setupListeners() {
-        addKeyListener(this);
-        setFocusable(true);
-    }
-
     @Override
     public void keyPressed(KeyEvent e) {
-        switch ( e.getKeyCode() ) {
-            case KeyEvent.VK_W -> direction = Direction.UP;
-            case KeyEvent.VK_S -> direction = Direction.DOWN;
-            case KeyEvent.VK_A -> direction = Direction.LEFT;
-            case KeyEvent.VK_D -> direction = Direction.RIGHT;
-        }
+        this.snake.keyPressed(e);
     }
 
     @Override
@@ -93,4 +63,6 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {}
+//#endregion
+
 }
