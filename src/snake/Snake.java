@@ -13,14 +13,11 @@ public class Snake implements KeyListener {
     enum Direction { UP, DOWN, LEFT, RIGHT };
     private Direction direction;
 
-    private boolean activeGame;
-
-    private Timer timer;
 
     public Snake() {
         this.snakeLength = 3;
-        this.currentX = SnakePanel.SQUARE_LENGTH;
-        this.currentY = SnakePanel.SQUARE_LENGTH;
+        this.currentX = SnakePanel.BORDER_SIZE;
+        this.currentY = SnakePanel.BORDER_SIZE;
         this.direction = Direction.RIGHT;
     }
 
@@ -57,20 +54,20 @@ public class Snake implements KeyListener {
 
     protected void drawSnake(Graphics2D g) {
         g.setColor(Color.GREEN);
-        g.fillRect(currentX, currentY, SnakePanel.SQUARE_LENGTH, SnakePanel.SQUARE_LENGTH);
+        g.fillRect(currentX + 2, currentY + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
     }
 
     protected boolean checkCollision() {
-        return this.currentY < SnakePanel.SQUARE_LENGTH ||
-               this.currentY > SnakePanel.screenHeight - SnakePanel.SQUARE_LENGTH ||
-               this.currentX < SnakePanel.SQUARE_LENGTH ||
-               this.currentX > SnakePanel.screenWidth - SnakePanel.SQUARE_LENGTH;
+        return this.currentY < SnakePanel.BORDER_SIZE ||
+               this.currentY > SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
+               this.currentX < SnakePanel.BORDER_SIZE ||
+               this.currentX > SnakePanel.screenWidth - SnakePanel.BORDER_SIZE;
     }
 
     protected void resetSnake() {
         this.snakeLength = 3;
-        this.currentX = SnakePanel.SQUARE_LENGTH;
-        this.currentY = SnakePanel.SQUARE_LENGTH;
+        this.currentX = SnakePanel.BORDER_SIZE;
+        this.currentY = SnakePanel.BORDER_SIZE;
         this.direction = Direction.RIGHT;
     }
 }

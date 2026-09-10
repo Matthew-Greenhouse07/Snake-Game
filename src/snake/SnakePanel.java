@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.awt.Color;
 
 public class SnakePanel extends JPanel implements KeyListener {
 
@@ -12,6 +13,7 @@ public class SnakePanel extends JPanel implements KeyListener {
     private Snake snake;
     private JButton btnStartAgain = new JButton("Start Again?");
     protected static final int SQUARE_LENGTH = 100;
+    protected static final int BORDER_SIZE = 20;
     protected static int screenWidth;
     protected static int screenHeight;
 
@@ -19,8 +21,10 @@ public class SnakePanel extends JPanel implements KeyListener {
         // Toolkit retrieves system information
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenDimensions = toolkit.getScreenSize();
-        this.screenWidth = ((int) screenDimensions.width / SQUARE_LENGTH) * SQUARE_LENGTH;
-        this.screenHeight = ((int) screenDimensions.height / SQUARE_LENGTH) * SQUARE_LENGTH;
+        this.screenWidth = screenDimensions.width;
+        this.screenHeight = screenDimensions.height;
+        // this.screenWidth = ((int) screenDimensions.width / SQUARE_LENGTH) * SQUARE_LENGTH;
+        // this.screenHeight = ((int) screenDimensions.height / SQUARE_LENGTH) * SQUARE_LENGTH;
 
         // set up everything
         setupBackground();
@@ -45,6 +49,8 @@ public class SnakePanel extends JPanel implements KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+
+        drawBackground(g2);
         snake.drawSnake(g2);
     }
     
@@ -61,10 +67,26 @@ public class SnakePanel extends JPanel implements KeyListener {
         revalidate();
     }
 
+    protected void drawBackground(Graphics2D g) {
+        g.setColor(Color.BLACK);
+
+        int currX = BORDER_SIZE - 1;
+        while (currX < this.screenWidth - BORDER_SIZE) {
+            g.fillRect(currX, BORDER_SIZE, 4, this.screenHeight - BORDER_SIZE);
+            currX += SQUARE_LENGTH;
+        }
+
+        int currY = BORDER_SIZE - 1;
+        while (currY < this.screenHeight - BORDER_SIZE) {
+            g.fillRect(BORDER_SIZE, currY, this.screenWidth - BORDER_SIZE, 4);
+            currY += SQUARE_LENGTH;
+        }
+    }
+
 //#region "set up events"
     protected void setupBackground() {
-        setBackground(Color.BLACK);
-        setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), SQUARE_LENGTH));
+        setBackground(new Color(10, 10, 10));
+        setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), BORDER_SIZE));
     }
 
     protected void setupRefreshRate(int rate) {
