@@ -3,10 +3,14 @@ package snake;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Snake implements KeyListener {
 
     private int snakeLength;
+    private ArrayList<Point> coords = new ArrayList<>();
+
     private int currentX;
     private int currentY;
 
@@ -15,11 +19,9 @@ public class Snake implements KeyListener {
 
 
     public Snake() {
-        this.snakeLength = 3;
-        this.currentX = SnakePanel.BORDER_SIZE;
-        this.currentY = SnakePanel.BORDER_SIZE;
-        this.direction = Direction.RIGHT;
+        resetSnake();
     }
+
 
     protected void updateSnake() {
         switch ( direction ) {
@@ -28,7 +30,40 @@ public class Snake implements KeyListener {
             case LEFT -> { currentX -= SnakePanel.SQUARE_LENGTH; }
             case RIGHT -> { currentX += SnakePanel.SQUARE_LENGTH; }
         }
+
+        coords.add(new Point(currentX, currentY));
+        coords.remove(0);
     }
+
+
+    protected void resetSnake() {
+        this.snakeLength = 3;
+        this.coords.clear();
+        this.currentX = SnakePanel.BORDER_SIZE + 2*SnakePanel.SQUARE_LENGTH;
+        this.currentY = SnakePanel.BORDER_SIZE;
+
+        coords.add(new Point(SnakePanel.BORDER_SIZE, SnakePanel.BORDER_SIZE));
+        coords.add(new Point(SnakePanel.BORDER_SIZE + SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
+        coords.add(new Point(this.currentX, this.currentY));
+        this.direction = Direction.RIGHT;
+    }
+
+
+    protected void drawSnake(Graphics2D g) {
+        g.setColor(Color.GREEN);
+        for (Point point : this.coords) {
+            g.fillRect((int)point.getX() + 2, (int)point.getY() + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
+        }
+    }
+
+
+    protected boolean checkCollision() {
+        return this.currentY < SnakePanel.BORDER_SIZE ||
+               this.currentY > SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
+               this.currentX < SnakePanel.BORDER_SIZE ||
+               this.currentX > SnakePanel.screenWidth - SnakePanel.BORDER_SIZE;
+    }
+
 
 //#region "key events"
     @Override
@@ -51,23 +86,5 @@ public class Snake implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {}
 //#endregion
-
-    protected void drawSnake(Graphics2D g) {
-        g.setColor(Color.GREEN);
-        g.fillRect(currentX + 2, currentY + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
-    }
-
-    protected boolean checkCollision() {
-        return this.currentY < SnakePanel.BORDER_SIZE ||
-               this.currentY > SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
-               this.currentX < SnakePanel.BORDER_SIZE ||
-               this.currentX > SnakePanel.screenWidth - SnakePanel.BORDER_SIZE;
-    }
-
-    protected void resetSnake() {
-        this.snakeLength = 3;
-        this.currentX = SnakePanel.BORDER_SIZE;
-        this.currentY = SnakePanel.BORDER_SIZE;
-        this.direction = Direction.RIGHT;
-    }
+    
 }

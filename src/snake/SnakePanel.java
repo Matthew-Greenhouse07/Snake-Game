@@ -17,6 +17,7 @@ public class SnakePanel extends JPanel implements KeyListener {
     protected static int screenWidth;
     protected static int screenHeight;
 
+
     public SnakePanel() {
         // Toolkit retrieves system information
         Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -46,6 +47,7 @@ public class SnakePanel extends JPanel implements KeyListener {
         startNewGame();
     }
 
+
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
@@ -54,6 +56,7 @@ public class SnakePanel extends JPanel implements KeyListener {
         snake.drawSnake(g2);
     }
     
+
     private void startNewGame() {
         this.activeGame = true;
         btnStartAgain.setVisible(false);
@@ -61,11 +64,13 @@ public class SnakePanel extends JPanel implements KeyListener {
         timer.start();
     }
 
+
     protected void gameOver() {
         this.activeGame = false;
         btnStartAgain.setVisible(true);
         revalidate();
     }
+
 
     protected void drawBackground(Graphics2D g) {
         g.setColor(Color.BLACK);
@@ -82,6 +87,7 @@ public class SnakePanel extends JPanel implements KeyListener {
             currY += SQUARE_LENGTH;
         }
     }
+
 
 //#region "set up events"
     protected void setupBackground() {
