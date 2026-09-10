@@ -4,14 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.Toolkit;
 import java.awt.event.*;
-import java.awt.event.*;
 
 public class SnakePanel extends JPanel implements KeyListener {
 
     private boolean activeGame;
     private Timer timer;
     private Snake snake;
-    protected static final int SQUARE_LENGTH = 50;
+    private JButton btnStartAgain = new JButton("Start Again?");
+    protected static final int SQUARE_LENGTH = 100;
     protected static int screenWidth;
     protected static int screenHeight;
 
@@ -24,20 +24,42 @@ public class SnakePanel extends JPanel implements KeyListener {
 
         // set up everything
         setupBackground();
-        setupRefreshRate(50);
+        setupRefreshRate(100);
         addKeyListener(this);
         setFocusable(true);
 
+        btnStartAgain.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startNewGame();
+            }
+        });
+
+        this.add(btnStartAgain);
+        btnStartAgain.setVisible(false);
+
         this.snake = new Snake();
+        startNewGame();
     }
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        snake.updateSnake();
         snake.drawSnake(g2);
     }
     
+    private void startNewGame() {
+        this.activeGame = true;
+        btnStartAgain.setVisible(false);
+        snake.resetSnake();
+        timer.start();
+    }
+
+    protected void gameOver() {
+        this.activeGame = false;
+        btnStartAgain.setVisible(true);
+        revalidate();
+    }
 
 //#region "set up events"
     protected void setupBackground() {
@@ -47,7 +69,13 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     protected void setupRefreshRate(int rate) {
         timer = new Timer(rate, e -> {
-            repaint();
+            if (activeGame) {
+                snake.updateSnake();
+                if (snake.checkCollision()) { gameOver(); }
+                else { repaint(); }
+            } else {
+                timer.stop();
+            }
         });
 
         timer.start();
