@@ -9,7 +9,7 @@ import java.util.List;
 public class Snake implements KeyListener {
 
     private int snakeLength;
-    private ArrayList<Point> coords = new ArrayList<>();
+    protected ArrayList<Point> coords = new ArrayList<>();
 
     private int currentX;
     private int currentY;
@@ -23,7 +23,7 @@ public class Snake implements KeyListener {
     }
 
 
-    protected void updateSnake() {
+    protected void updateSnake(Apple apple) {
         switch ( direction ) {
             case UP -> { currentY -= SnakePanel.SQUARE_LENGTH; }
             case DOWN -> { currentY += SnakePanel.SQUARE_LENGTH; }
@@ -32,7 +32,8 @@ public class Snake implements KeyListener {
         }
 
         coords.add(new Point(currentX, currentY));
-        coords.remove(0);
+        
+        if (!appleEaten(apple)) { coords.remove(0); }
     }
 
 
@@ -62,6 +63,11 @@ public class Snake implements KeyListener {
                this.currentY > SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
                this.currentX < SnakePanel.BORDER_SIZE ||
                this.currentX > SnakePanel.screenWidth - SnakePanel.BORDER_SIZE;
+    }
+
+
+    protected boolean appleEaten(Apple apple) {
+        return ((apple.getAppleX() == this.currentX) && (apple.getAppleY() == this.currentY));
     }
 
 

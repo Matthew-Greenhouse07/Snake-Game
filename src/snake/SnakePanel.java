@@ -11,6 +11,7 @@ public class SnakePanel extends JPanel implements KeyListener {
     private boolean activeGame;
     private Timer timer;
     private Snake snake;
+    private Apple apple;
     private JButton btnStartAgain = new JButton("Start Again?");
     protected static final int SQUARE_LENGTH = 100;
     protected static final int BORDER_SIZE = 20;
@@ -44,6 +45,9 @@ public class SnakePanel extends JPanel implements KeyListener {
         btnStartAgain.setVisible(false);
 
         this.snake = new Snake();
+        this.apple = new Apple();
+        apple.spawnApple();
+
         startNewGame();
     }
 
@@ -54,6 +58,7 @@ public class SnakePanel extends JPanel implements KeyListener {
 
         drawBackground(g2);
         snake.drawSnake(g2);
+        apple.drawApple(g2);
     }
     
 
@@ -98,9 +103,15 @@ public class SnakePanel extends JPanel implements KeyListener {
     protected void setupRefreshRate(int rate) {
         timer = new Timer(rate, e -> {
             if (activeGame) {
-                snake.updateSnake();
-                if (snake.checkCollision()) { gameOver(); }
-                else { repaint(); }
+                snake.updateSnake(this.apple);
+                if (snake.appleEaten(this.apple)) {
+                    apple.spawnApple();
+                }
+                if (snake.checkCollision()) {
+                    gameOver();
+                } else {
+                    repaint();
+                }
             } else {
                 timer.stop();
             }
