@@ -62,7 +62,8 @@ public class Snake implements KeyListener {
         return this.currentY < SnakePanel.BORDER_SIZE ||
                this.currentY > SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
                this.currentX < SnakePanel.BORDER_SIZE ||
-               this.currentX > SnakePanel.screenWidth - SnakePanel.BORDER_SIZE;
+               this.currentX > SnakePanel.screenWidth - SnakePanel.BORDER_SIZE ||
+               coords.subList(0, coords.size() - 1).contains(new Point(this.currentX, this.currentY));
     }
 
 
