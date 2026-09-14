@@ -9,13 +9,15 @@ import java.util.List;
 public class Snake implements KeyListener {
 
     private int snakeLength;
-    protected ArrayList<Point> coords = new ArrayList<>();
+    private ArrayList<Point> coords = new ArrayList<>();
 
     private int currentX;
     private int currentY;
 
     enum Direction { UP, DOWN, LEFT, RIGHT };
     private Direction direction;
+
+    private boolean hasMoved = true;
 
 
     public Snake() {
@@ -31,9 +33,18 @@ public class Snake implements KeyListener {
             case RIGHT -> { currentX += SnakePanel.SQUARE_LENGTH; }
         }
 
-        coords.add(new Point(currentX, currentY));
+        hasMoved = true;
+
+        Point current = new Point(currentX, currentY);
+        coords.add(current);
         
-        if (!appleEaten(apple)) { coords.remove(0); }
+        if (appleEaten(apple)) {
+            apple.updateAvailableSquares(current);
+        } else {
+            Point snakeLeft = new Point(this.coords.get(0));
+            apple.updateAvailableSquares(current, snakeLeft);
+            coords.remove(0);
+        }
     }
 
 
@@ -60,9 +71,9 @@ public class Snake implements KeyListener {
 
     protected boolean checkCollision() {
         return this.currentY < SnakePanel.BORDER_SIZE ||
-               this.currentY > SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
+               this.currentY >= SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
                this.currentX < SnakePanel.BORDER_SIZE ||
-               this.currentX > SnakePanel.screenWidth - SnakePanel.BORDER_SIZE ||
+               this.currentX >= SnakePanel.screenWidth - SnakePanel.BORDER_SIZE ||
                coords.subList(0, coords.size() - 1).contains(new Point(this.currentX, this.currentY));
     }
 
@@ -75,15 +86,19 @@ public class Snake implements KeyListener {
 //#region "key events"
     @Override
     public void keyPressed(KeyEvent e) {
-        switch ( e.getKeyCode() ) {
-            case KeyEvent.VK_W -> {
-                if (direction != direction.DOWN) { direction = Direction.UP; }}
-            case KeyEvent.VK_S -> {
-                if (direction != direction.UP) { direction = Direction.DOWN; }}
-            case KeyEvent.VK_A -> {
-                if (direction != direction.RIGHT) { direction = Direction.LEFT; }}
-            case KeyEvent.VK_D -> {
-                if (direction != direction.LEFT) { direction = Direction.RIGHT; }}
+        if (this.hasMoved) {
+            switch ( e.getKeyCode() ) {
+                case KeyEvent.VK_W -> {
+                    if (direction != direction.DOWN) { direction = Direction.UP; }}
+                case KeyEvent.VK_S -> {
+                    if (direction != direction.UP) { direction = Direction.DOWN; }}
+                case KeyEvent.VK_A -> {
+                    if (direction != direction.RIGHT) { direction = Direction.LEFT; }}
+                case KeyEvent.VK_D -> {
+                    if (direction != direction.LEFT) { direction = Direction.RIGHT; }}
+            }
+
+            this.hasMoved = false;
         }
     }
 

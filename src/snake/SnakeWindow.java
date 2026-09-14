@@ -12,7 +12,9 @@ public class SnakeWindow extends JFrame {
         add(snakePanel, BorderLayout.CENTER);
 
         // Maximise JFrame to fit entire screen
-        setExtendedState(MAXIMIZED_BOTH);
+        // setExtendedState(MAXIMIZED_BOTH);
+
+        pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }

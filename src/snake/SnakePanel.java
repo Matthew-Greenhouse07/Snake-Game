@@ -15,18 +15,13 @@ public class SnakePanel extends JPanel implements KeyListener {
     private JButton btnStartAgain = new JButton("Start Again?");
     protected static final int SQUARE_LENGTH = 100;
     protected static final int BORDER_SIZE = 20;
-    protected static int screenWidth;
-    protected static int screenHeight;
+    protected static int screenWidth = 1000;
+    protected static int screenHeight = 800;
 
 
     public SnakePanel() {
-        // Toolkit retrieves system information
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Dimension screenDimensions = toolkit.getScreenSize();
-        this.screenWidth = screenDimensions.width;
-        this.screenHeight = screenDimensions.height;
-        // this.screenWidth = ((int) screenDimensions.width / SQUARE_LENGTH) * SQUARE_LENGTH;
-        // this.screenHeight = ((int) screenDimensions.height / SQUARE_LENGTH) * SQUARE_LENGTH;
+        // Preferred panel size
+        setPreferredSize(new Dimension(screenWidth + 2*BORDER_SIZE, screenHeight + 2*BORDER_SIZE));
 
         // set up everything
         setupBackground();
@@ -45,8 +40,6 @@ public class SnakePanel extends JPanel implements KeyListener {
         btnStartAgain.setVisible(false);
 
         this.snake = new Snake();
-        this.apple = new Apple();
-        apple.spawnApple();
 
         startNewGame();
     }
@@ -67,6 +60,8 @@ public class SnakePanel extends JPanel implements KeyListener {
         btnStartAgain.setVisible(false);
         snake.resetSnake();
         timer.start();
+        this.apple = new Apple();
+        apple.spawnApple();
     }
 
 
@@ -133,3 +128,16 @@ public class SnakePanel extends JPanel implements KeyListener {
 //#endregion
 
 }
+
+
+
+
+// Other
+
+    // Toolkit retrieves system information
+    // Toolkit toolkit = Toolkit.getDefaultToolkit();
+    // Dimension screenDimensions = toolkit.getScreenSize();
+    // this.screenWidth = screenDimensions.width;
+    // this.screenHeight = screenDimensions.height;
+    // this.screenWidth = ((int) screenDimensions.width / SQUARE_LENGTH) * SQUARE_LENGTH;
+    // this.screenHeight = ((int) screenDimensions.height / SQUARE_LENGTH) * SQUARE_LENGTH;
