@@ -29,18 +29,18 @@ public class Apple {
         }
 
         // initial coords of the snake
-        this.availableSquares.remove(new Point(SnakePanel.BORDER_SIZE, SnakePanel.BORDER_SIZE));
-        this.availableSquares.remove(new Point(SnakePanel.BORDER_SIZE + SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
-        this.availableSquares.remove(new Point(SnakePanel.BORDER_SIZE + 2*SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
+        availableSquares.remove(new Point(SnakePanel.BORDER_SIZE, SnakePanel.BORDER_SIZE));
+        availableSquares.remove(new Point(SnakePanel.BORDER_SIZE + SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
+        availableSquares.remove(new Point(SnakePanel.BORDER_SIZE + 2*SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
     }
 
 
     protected void spawnApple() {
-        if (this.availableSquares.size() > 0) {
+        if (availableSquares.size() > 0) {
             Point current = availableSquares.get((int) (Math.random() * availableSquares.size()));
             
-            this.currentX = (int) current.getX();
-            this.currentY = (int) current.getY();
+            currentX = (int) current.getX();
+            currentY = (int) current.getY();
         } else {
             System.out.println("You Win!");
         }
@@ -54,16 +54,16 @@ public class Apple {
 
 
     protected void updateAvailableSquares(Point snakeEntered, Point snakeLeft) {
-        this.availableSquares.remove(snakeEntered);
-        this.availableSquares.add(snakeLeft);
+        availableSquares.remove(snakeEntered);
+        availableSquares.add(snakeLeft);
     }
 
     protected void updateAvailableSquares(Point snakeEntered) {
-        this.availableSquares.remove(snakeEntered);
+        availableSquares.remove(snakeEntered);
     }
 
 
-    protected int getAppleX() { return this.currentX; }
-    protected int getAppleY() { return this.currentY; }
+    protected int getAppleX() { return currentX; }
+    protected int getAppleY() { return currentY; }
 
 }

@@ -40,8 +40,9 @@ public class Snake implements KeyListener {
         
         if (appleEaten(apple)) {
             apple.updateAvailableSquares(current);
+            snakeLength++;
         } else {
-            Point snakeLeft = new Point(this.coords.get(0));
+            Point snakeLeft = new Point(coords.get(0));
             apple.updateAvailableSquares(current, snakeLeft);
             coords.remove(0);
         }
@@ -49,56 +50,56 @@ public class Snake implements KeyListener {
 
 
     protected void resetSnake() {
-        this.snakeLength = 3;
-        this.coords.clear();
-        this.currentX = SnakePanel.BORDER_SIZE + 2*SnakePanel.SQUARE_LENGTH;
-        this.currentY = SnakePanel.BORDER_SIZE;
+        snakeLength = 3;
+        coords.clear();
+        currentX = SnakePanel.BORDER_SIZE + 2*SnakePanel.SQUARE_LENGTH;
+        currentY = SnakePanel.BORDER_SIZE;
 
         coords.add(new Point(SnakePanel.BORDER_SIZE, SnakePanel.BORDER_SIZE));
         coords.add(new Point(SnakePanel.BORDER_SIZE + SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
-        coords.add(new Point(this.currentX, this.currentY));
-        this.direction = Direction.RIGHT;
+        coords.add(new Point(currentX, currentY));
+        direction = Direction.RIGHT;
     }
 
 
     protected void drawSnake(Graphics2D g) {
         g.setColor(Color.GREEN);
-        for (Point point : this.coords) {
+        for (Point point : coords) {
             g.fillRect((int)point.getX() + 2, (int)point.getY() + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
         }
     }
 
 
     protected boolean checkCollision() {
-        return this.currentY < SnakePanel.BORDER_SIZE ||
-               this.currentY >= SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
-               this.currentX < SnakePanel.BORDER_SIZE ||
-               this.currentX >= SnakePanel.screenWidth - SnakePanel.BORDER_SIZE ||
-               coords.subList(0, coords.size() - 1).contains(new Point(this.currentX, this.currentY));
+        return currentY < SnakePanel.BORDER_SIZE ||
+               currentY >= SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
+               currentX < SnakePanel.BORDER_SIZE ||
+               currentX >= SnakePanel.screenWidth - SnakePanel.BORDER_SIZE ||
+               coords.subList(0, coords.size() - 1).contains(new Point(currentX, currentY));
     }
 
 
     protected boolean appleEaten(Apple apple) {
-        return ((apple.getAppleX() == this.currentX) && (apple.getAppleY() == this.currentY));
+        return ((apple.getAppleX() == currentX) && (apple.getAppleY() == currentY));
     }
 
 
 //#region "key events"
     @Override
     public void keyPressed(KeyEvent e) {
-        if (this.hasMoved) {
-            switch ( e.getKeyCode() ) {
-                case KeyEvent.VK_W -> {
+        if (hasMoved) {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_W, KeyEvent.VK_UP -> {
                     if (direction != direction.DOWN) { direction = Direction.UP; }}
-                case KeyEvent.VK_S -> {
+                case KeyEvent.VK_S, KeyEvent.VK_DOWN -> {
                     if (direction != direction.UP) { direction = Direction.DOWN; }}
-                case KeyEvent.VK_A -> {
+                case KeyEvent.VK_A, KeyEvent.VK_LEFT -> {
                     if (direction != direction.RIGHT) { direction = Direction.LEFT; }}
-                case KeyEvent.VK_D -> {
+                case KeyEvent.VK_D, KeyEvent.VK_RIGHT -> {
                     if (direction != direction.LEFT) { direction = Direction.RIGHT; }}
             }
 
-            this.hasMoved = false;
+            hasMoved = false;
         }
     }
 

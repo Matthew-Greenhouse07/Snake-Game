@@ -6,42 +6,55 @@ import java.awt.Toolkit;
 import java.awt.event.*;
 import java.awt.Color;
 
+
 public class SnakePanel extends JPanel implements KeyListener {
 
     private boolean activeGame;
     private Timer timer;
     private Snake snake;
     private Apple apple;
-    private JButton btnStartAgain = new JButton("Start Again?");
-    protected static final int SQUARE_LENGTH = 100;
+
+    private ControlsPanel controlsPanel;
+
+    private JButton btnStartAgain;
+    private JButton btnMenu;
+
+    protected static int SQUARE_LENGTH;
     protected static final int BORDER_SIZE = 20;
-    protected static int screenWidth = 1000;
-    protected static int screenHeight = 800;
+    protected static int screenWidth = 1200;
+    protected static int screenHeight = 900;
 
 
     public SnakePanel() {
-        // Preferred panel size
+        // preferred panel size
         setPreferredSize(new Dimension(screenWidth + 2*BORDER_SIZE, screenHeight + 2*BORDER_SIZE));
 
         // set up everything
+        activeGame = false;
         setupBackground();
-        setupRefreshRate(100);
+
+        controlsPanel = new ControlsPanel();
+        add(controlsPanel);
+
         addKeyListener(this);
+        addButtons();
+        addButtonListeners();
+
         setFocusable(true);
 
-        btnStartAgain.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startNewGame();
-            }
-        });
+        snake = new Snake();
+        mainMenu();
+    }
 
-        this.add(btnStartAgain);
-        btnStartAgain.setVisible(false);
 
-        this.snake = new Snake();
+    protected void mainMenu() {
+        activeGame = false;
+        btnStartAgain.setVisible(true);
+        btnMenu.setVisible(false);
+        controlsPanel.setVisible(true);
 
-        startNewGame();
+        revalidate();
+        repaint();
     }
 
 
@@ -49,25 +62,45 @@ public class SnakePanel extends JPanel implements KeyListener {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
-        drawBackground(g2);
-        snake.drawSnake(g2);
-        apple.drawApple(g2);
+        if (activeGame) {
+            drawBackground(g2);
+            snake.drawSnake(g2);
+            apple.drawApple(g2);
+        }
     }
     
 
     private void startNewGame() {
-        this.activeGame = true;
+        activeGame = true;
+
         btnStartAgain.setVisible(false);
+        btnMenu.setVisible(false);
+        controlsPanel.setVisible(false);
+
+        String mapSize = controlsPanel.getMapSize();
+        switch (mapSize) {
+            case ("normal") -> { SQUARE_LENGTH = 100; }
+            case ("small") -> { SQUARE_LENGTH = 150; }
+            case ("large") -> { SQUARE_LENGTH = 75; }
+        }
+
         snake.resetSnake();
-        timer.start();
-        this.apple = new Apple();
+        apple = new Apple();
         apple.spawnApple();
+
+        String speed = controlsPanel.getSpeed();
+        switch (speed) {
+            case ("normal") -> { setupRefreshRate(100); }
+            case ("fast") -> { setupRefreshRate(50); }
+            case ("slow") -> { setupRefreshRate(150); }
+        }
     }
 
 
     protected void gameOver() {
-        this.activeGame = false;
+        activeGame = false;
         btnStartAgain.setVisible(true);
+        btnMenu.setVisible(true);
         revalidate();
     }
 
@@ -76,14 +109,14 @@ public class SnakePanel extends JPanel implements KeyListener {
         g.setColor(Color.BLACK);
 
         int currX = BORDER_SIZE - 1;
-        while (currX < this.screenWidth - BORDER_SIZE) {
-            g.fillRect(currX, BORDER_SIZE, 4, this.screenHeight - BORDER_SIZE);
+        while (currX < screenWidth - BORDER_SIZE) {
+            g.fillRect(currX, BORDER_SIZE, 4, screenHeight - BORDER_SIZE);
             currX += SQUARE_LENGTH;
         }
 
         int currY = BORDER_SIZE - 1;
-        while (currY < this.screenHeight - BORDER_SIZE) {
-            g.fillRect(BORDER_SIZE, currY, this.screenWidth - BORDER_SIZE, 4);
+        while (currY < screenHeight - BORDER_SIZE) {
+            g.fillRect(BORDER_SIZE, currY, screenWidth - BORDER_SIZE, 4);
             currY += SQUARE_LENGTH;
         }
     }
@@ -98,8 +131,8 @@ public class SnakePanel extends JPanel implements KeyListener {
     protected void setupRefreshRate(int rate) {
         timer = new Timer(rate, e -> {
             if (activeGame) {
-                snake.updateSnake(this.apple);
-                if (snake.appleEaten(this.apple)) {
+                snake.updateSnake(apple);
+                if (snake.appleEaten(apple)) {
                     apple.spawnApple();
                 }
                 if (snake.checkCollision()) {
@@ -117,7 +150,7 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        this.snake.keyPressed(e);
+        snake.keyPressed(e);
     }
 
     @Override
@@ -125,19 +158,20 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {}
+
+
+    protected void addButtons() {
+        btnStartAgain = new JButton("Start Again?");
+        add(btnStartAgain);
+        btnMenu = new JButton("Menu");
+        add(btnMenu);
+    }
+
+    protected void addButtonListeners() {
+        btnStartAgain.addActionListener(e -> { startNewGame(); });
+        btnMenu.addActionListener(e -> { mainMenu(); });
+    }
+    
 //#endregion
 
 }
-
-
-
-
-// Other
-
-    // Toolkit retrieves system information
-    // Toolkit toolkit = Toolkit.getDefaultToolkit();
-    // Dimension screenDimensions = toolkit.getScreenSize();
-    // this.screenWidth = screenDimensions.width;
-    // this.screenHeight = screenDimensions.height;
-    // this.screenWidth = ((int) screenDimensions.width / SQUARE_LENGTH) * SQUARE_LENGTH;
-    // this.screenHeight = ((int) screenDimensions.height / SQUARE_LENGTH) * SQUARE_LENGTH;
