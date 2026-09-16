@@ -25,7 +25,7 @@ public class Snake implements KeyListener {
     }
 
 
-    protected void updateSnake(Apple apple) {
+    protected void updateSnake(ArrayList<Apple> apples) {
         switch ( direction ) {
             case UP -> { currentY -= SnakePanel.SQUARE_LENGTH; }
             case DOWN -> { currentY += SnakePanel.SQUARE_LENGTH; }
@@ -38,12 +38,12 @@ public class Snake implements KeyListener {
         Point current = new Point(currentX, currentY);
         coords.add(current);
         
-        if (appleEaten(apple)) {
-            apple.updateAvailableSquares(current);
+        if (appleEaten(apples)) {
+            Apple.updateAvailableSquares(current);
             snakeLength++;
         } else {
             Point snakeLeft = new Point(coords.get(0));
-            apple.updateAvailableSquares(current, snakeLeft);
+            Apple.updateAvailableSquares(current, snakeLeft);
             coords.remove(0);
         }
     }
@@ -75,12 +75,30 @@ public class Snake implements KeyListener {
                currentY >= SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
                currentX < SnakePanel.BORDER_SIZE ||
                currentX >= SnakePanel.screenWidth - SnakePanel.BORDER_SIZE ||
+               // self collision
                coords.subList(0, coords.size() - 1).contains(new Point(currentX, currentY));
     }
 
 
-    protected boolean appleEaten(Apple apple) {
-        return ((apple.getAppleX() == currentX) && (apple.getAppleY() == currentY));
+    protected boolean appleEaten(ArrayList<Apple> apples) {
+        for (Apple apple : apples) {
+            if ((apple.getAppleX() == currentX) && (apple.getAppleY() == currentY)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+
+    protected Apple getEatenApple(ArrayList<Apple> apples) {
+        for (Apple apple : apples) {
+            if ((apple.getAppleX() == currentX) && (apple.getAppleY() == currentY)) {
+                return apple;
+            }
+        }
+
+        return null;
     }
 
 

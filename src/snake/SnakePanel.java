@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.Toolkit;
 import java.awt.event.*;
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SnakePanel extends JPanel implements KeyListener {
@@ -12,7 +14,7 @@ public class SnakePanel extends JPanel implements KeyListener {
     private boolean activeGame;
     private Timer timer;
     private Snake snake;
-    private Apple apple;
+    private ArrayList<Apple> apples = new ArrayList<>();
 
     private ControlsPanel controlsPanel;
 
@@ -26,7 +28,7 @@ public class SnakePanel extends JPanel implements KeyListener {
 
 
     public SnakePanel() {
-        // preferred panel size
+        // preferred panel size (screen width is the playing area and doesnt include borders)
         setPreferredSize(new Dimension(screenWidth + 2*BORDER_SIZE, screenHeight + 2*BORDER_SIZE));
 
         // set up everything
@@ -65,7 +67,9 @@ public class SnakePanel extends JPanel implements KeyListener {
         if (activeGame) {
             drawBackground(g2);
             snake.drawSnake(g2);
-            apple.drawApple(g2);
+            for (Apple apple : apples) {
+                apple.drawApple(g2);
+            }
         }
     }
     
@@ -84,9 +88,17 @@ public class SnakePanel extends JPanel implements KeyListener {
             case ("large") -> { SQUARE_LENGTH = 75; }
         }
 
+        int numApples = controlsPanel.getNumApples();
+        for (int i=0; i < numApples; i++) {
+            apples.add(new Apple());
+        }
+
         snake.resetSnake();
-        apple = new Apple();
-        apple.spawnApple();
+        
+        Apple.resetAvailableSquares();
+        for (Apple apple : apples) {
+            apple.spawnApple();
+        }
 
         String speed = controlsPanel.getSpeed();
         switch (speed) {
@@ -101,6 +113,7 @@ public class SnakePanel extends JPanel implements KeyListener {
         activeGame = false;
         btnStartAgain.setVisible(true);
         btnMenu.setVisible(true);
+        apples.clear();
         revalidate();
     }
 
@@ -131,9 +144,12 @@ public class SnakePanel extends JPanel implements KeyListener {
     protected void setupRefreshRate(int rate) {
         timer = new Timer(rate, e -> {
             if (activeGame) {
-                snake.updateSnake(apple);
-                if (snake.appleEaten(apple)) {
-                    apple.spawnApple();
+                snake.updateSnake(apples);
+                if (snake.appleEaten(apples)) {
+                    Apple apple = snake.getEatenApple(apples);
+                    if (apple != null) {
+                        apple.spawnApple();
+                    }
                 }
                 if (snake.checkCollision()) {
                     gameOver();

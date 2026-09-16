@@ -9,10 +9,39 @@ public class Apple {
 
     private int currentX;
     private int currentY;
-    private ArrayList<Point> availableSquares = new ArrayList<>();
+    private static ArrayList<Point> availableSquares = new ArrayList<>();
 
 
-    public Apple() {
+    protected void spawnApple() {
+        if (availableSquares.size() > 0) {
+            Point current = availableSquares.get((int) (Math.random() * availableSquares.size()));
+            
+            currentX = (int) current.getX();
+            currentY = (int) current.getY();
+
+            // remove spawned apple coords from avaialable squares array
+            updateAvailableSquares(current);
+        } else {
+            //____________________________
+            //
+            // needs fixing
+            // can win before finishing all apples (if several are present)
+            //_____________________________
+
+            System.out.println("You Win!");
+        }
+    }
+
+
+    protected void drawApple(Graphics2D g) {
+        g.setColor(Color.RED);
+        g.fillRect(currentX + 2, currentY + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
+    }
+
+
+    protected static void resetAvailableSquares() {
+        availableSquares.clear();
+
         // Initialise availableSquares array
         int currX = SnakePanel.BORDER_SIZE;
         int currY;
@@ -35,31 +64,14 @@ public class Apple {
     }
 
 
-    protected void spawnApple() {
-        if (availableSquares.size() > 0) {
-            Point current = availableSquares.get((int) (Math.random() * availableSquares.size()));
-            
-            currentX = (int) current.getX();
-            currentY = (int) current.getY();
-        } else {
-            System.out.println("You Win!");
-        }
-    }
-
-
-    protected void drawApple(Graphics2D g) {
-        g.setColor(Color.RED);
-        g.fillRect(currentX + 2, currentY + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
-    }
-
-
-    protected void updateAvailableSquares(Point snakeEntered, Point snakeLeft) {
+    protected static void updateAvailableSquares(Point snakeEntered, Point snakeLeft) {
         availableSquares.remove(snakeEntered);
         availableSquares.add(snakeLeft);
     }
 
-    protected void updateAvailableSquares(Point snakeEntered) {
-        availableSquares.remove(snakeEntered);
+    protected static void updateAvailableSquares(Point takenSquare) {
+        // could be snake entering point or apple spawned at point
+        availableSquares.remove(takenSquare);
     }
 
 
