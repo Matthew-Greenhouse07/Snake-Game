@@ -7,9 +7,14 @@ import java.util.List;
 
 public class Apple {
 
-    private int currentX;
-    private int currentY;
     private static ArrayList<Point> availableSquares = new ArrayList<>();
+    private static int numApples = 1;
+    private static int finalApplesEaten = 0;      // to check when a game with multiple apples ends
+    private static boolean gameWon = false;
+
+    private int currentX;
+    private int currentY;  
+    private boolean spawnable;      // determines if the apple has is spawnable (or if space has ran out)
 
 
     protected void spawnApple() {
@@ -21,25 +26,36 @@ public class Apple {
 
             // remove spawned apple coords from avaialable squares array
             updateAvailableSquares(current);
-        } else {
-            //____________________________
-            //
-            // needs fixing
-            // can win before finishing all apples (if several are present)
-            //_____________________________
 
-            System.out.println("You Win!");
+            if (!spawnable) {
+                spawnable = true;
+            }
+        } else {
+            finalApplesEaten++;
+            spawnable = false;
+
+            if (finalApplesEaten == numApples) {
+                // win
+                gameWon = true;
+            }
         }
     }
 
 
     protected void drawApple(Graphics2D g) {
-        g.setColor(Color.RED);
-        g.fillRect(currentX + 2, currentY + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
+        if (spawnable) {
+            g.setColor(Color.RED);
+            g.fillRect(currentX + 2, currentY + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
+        }
     }
 
 
-    protected static void resetAvailableSquares() {
+    protected static void resetAvailableSquares(int numberOfApples) {
+        // reset these static values as well at beginning of game
+        numApples = numberOfApples;
+        finalApplesEaten = 0;
+        gameWon = false;
+
         availableSquares.clear();
 
         // Initialise availableSquares array
@@ -75,7 +91,13 @@ public class Apple {
     }
 
 
+    protected static boolean isWin() {
+        return gameWon;
+    }
+
+
     protected int getAppleX() { return currentX; }
     protected int getAppleY() { return currentY; }
+
 
 }

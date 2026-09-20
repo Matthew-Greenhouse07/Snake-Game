@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Snake implements KeyListener {
 
-    private int snakeLength;
+    private int snakeScore;
     private ArrayList<Point> coords = new ArrayList<>();
 
     private int currentX;
@@ -40,7 +40,7 @@ public class Snake implements KeyListener {
         
         if (appleEaten(apples)) {
             Apple.updateAvailableSquares(current);
-            snakeLength++;
+            snakeScore++;
         } else {
             Point snakeLeft = new Point(coords.get(0));
             Apple.updateAvailableSquares(current, snakeLeft);
@@ -50,7 +50,7 @@ public class Snake implements KeyListener {
 
 
     protected void resetSnake() {
-        snakeLength = 3;
+        snakeScore = 0;
         coords.clear();
         currentX = SnakePanel.BORDER_SIZE + 2*SnakePanel.SQUARE_LENGTH;
         currentY = SnakePanel.BORDER_SIZE;
@@ -63,9 +63,15 @@ public class Snake implements KeyListener {
 
 
     protected void drawSnake(Graphics2D g) {
-        g.setColor(Color.GREEN);
-        for (Point point : coords) {
+        int colorNum = 255;
+        for (int i = coords.size() - 1; i >= 0; i--) {
+            Point point = coords.get(i);
+            g.setColor(new Color(0, colorNum, 0));
             g.fillRect((int)point.getX() + 2, (int)point.getY() + 2, SnakePanel.SQUARE_LENGTH - 4, SnakePanel.SQUARE_LENGTH - 4);
+
+            if (colorNum > 0) {
+                colorNum -= 2;
+            }
         }
     }
 
@@ -86,7 +92,7 @@ public class Snake implements KeyListener {
                 return true;
             }
         }
-        
+            
         return false;
     }
 
@@ -102,22 +108,25 @@ public class Snake implements KeyListener {
     }
 
 
+    protected int getSnakeScore() {
+        return snakeScore;
+    }
+
+
 //#region "key events"
     @Override
     public void keyPressed(KeyEvent e) {
         if (hasMoved) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_W, KeyEvent.VK_UP -> {
-                    if (direction != direction.DOWN) { direction = Direction.UP; }}
+                    if (direction != direction.DOWN) { direction = Direction.UP; hasMoved = false;}}
                 case KeyEvent.VK_S, KeyEvent.VK_DOWN -> {
-                    if (direction != direction.UP) { direction = Direction.DOWN; }}
+                    if (direction != direction.UP) { direction = Direction.DOWN; hasMoved = false;}}
                 case KeyEvent.VK_A, KeyEvent.VK_LEFT -> {
-                    if (direction != direction.RIGHT) { direction = Direction.LEFT; }}
+                    if (direction != direction.RIGHT) { direction = Direction.LEFT; hasMoved = false;}}
                 case KeyEvent.VK_D, KeyEvent.VK_RIGHT -> {
-                    if (direction != direction.LEFT) { direction = Direction.RIGHT; }}
+                    if (direction != direction.LEFT) { direction = Direction.RIGHT; hasMoved = false;}}
             }
-
-            hasMoved = false;
         }
     }
 

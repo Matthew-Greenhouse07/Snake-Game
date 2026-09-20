@@ -7,40 +7,54 @@ import java.awt.event.*;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 
 public class SnakePanel extends JPanel implements KeyListener {
-
-    private boolean activeGame;
-    private Timer timer;
-    private Snake snake;
-    private ArrayList<Apple> apples = new ArrayList<>();
-
-    private ControlsPanel controlsPanel;
-
-    private JButton btnStartAgain;
-    private JButton btnMenu;
 
     protected static int SQUARE_LENGTH;
     protected static final int BORDER_SIZE = 20;
     protected static int screenWidth = 1200;
     protected static int screenHeight = 900;
 
+    private boolean activeGame;
+    private Timer timer;
+    private Snake snake;
+    private ArrayList<Apple> apples = new ArrayList<>();
+    private HashMap<String, Integer> highScores = new HashMap<>();  // String part will be concatenation of 
+                                                                    // speed -> map size -> num apples
+
+    private JPanel menu;
+    private ControlsPanel controlsPanel;
+
+    private JPanel pnlGameOverButtons;
+    private JButton btnStartAgain;
+    private JButton btnMenu;
+
+    private JLabel lblTitle;
+    private JLabel lblWin;
+
+    private JPanel pnlScoreLabels;
+    private JLabel lblHighScore;
+    private JLabel lblCurrScore;
+
 
     public SnakePanel() {
         // preferred panel size (screen width is the playing area and doesnt include borders)
         setPreferredSize(new Dimension(screenWidth + 2*BORDER_SIZE, screenHeight + 2*BORDER_SIZE));
 
+        // Display GUI elements vertically (elements which are horizontal are contained in their own panel of a different layout)
+        setLayout(new BorderLayout());
+
         // set up everything
         activeGame = false;
         setupBackground();
 
-        controlsPanel = new ControlsPanel();
-        add(controlsPanel);
-
         addKeyListener(this);
-        addButtons();
+        addButtonsAndLabels();
         addButtonListeners();
+
+        setupMenu();
 
         setFocusable(true);
 
@@ -51,9 +65,10 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     protected void mainMenu() {
         activeGame = false;
-        btnStartAgain.setVisible(true);
-        btnMenu.setVisible(false);
-        controlsPanel.setVisible(true);
+        pnlGameOverButtons.setVisible(false);
+        pnlScoreLabels.setVisible(false);
+        lblWin.setVisible(false);
+        menu.setVisible(true);
 
         revalidate();
         repaint();
@@ -74,33 +89,46 @@ public class SnakePanel extends JPanel implements KeyListener {
     }
     
 
-    private void startNewGame() {
+    protected void startNewGame() {
         activeGame = true;
 
-        btnStartAgain.setVisible(false);
-        btnMenu.setVisible(false);
-        controlsPanel.setVisible(false);
+        pnlGameOverButtons.setVisible(false);
+        pnlScoreLabels.setVisible(true);
+        lblWin.setVisible(false);
+        menu.setVisible(false);
 
+        String speed = controlsPanel.getSpeed();
         String mapSize = controlsPanel.getMapSize();
+        int numApples = controlsPanel.getNumApples();
+
+        lblCurrScore.setText("Current Score: 0");
+
+        // high score
+        String highScoreString = speed + mapSize + String.valueOf(numApples);
+        Integer currHighScore = highScores.get(highScoreString);                        
+        if (currHighScore != null) {
+            lblHighScore.setText("High Score: " + currHighScore);
+        } else {
+            lblHighScore.setText("High Score: 0");
+        }
+
         switch (mapSize) {
             case ("normal") -> { SQUARE_LENGTH = 100; }
             case ("small") -> { SQUARE_LENGTH = 150; }
             case ("large") -> { SQUARE_LENGTH = 75; }
         }
 
-        int numApples = controlsPanel.getNumApples();
         for (int i=0; i < numApples; i++) {
             apples.add(new Apple());
         }
 
         snake.resetSnake();
         
-        Apple.resetAvailableSquares();
+        Apple.resetAvailableSquares(numApples);
         for (Apple apple : apples) {
             apple.spawnApple();
         }
 
-        String speed = controlsPanel.getSpeed();
         switch (speed) {
             case ("normal") -> { setupRefreshRate(100); }
             case ("fast") -> { setupRefreshRate(50); }
@@ -111,8 +139,22 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     protected void gameOver() {
         activeGame = false;
-        btnStartAgain.setVisible(true);
-        btnMenu.setVisible(true);
+
+        // check for highscore
+        String highScoreString = controlsPanel.getSpeed() + controlsPanel.getMapSize() +
+                                    String.valueOf(controlsPanel.getNumApples());
+        Integer currHighScore = highScores.get(highScoreString);
+        int score = snake.getSnakeScore();
+        if (currHighScore == null || (score > currHighScore)) {
+            // add or replace high score
+            highScores.put(highScoreString, snake.getSnakeScore());
+        }
+
+        if (Apple.isWin()) {
+            lblWin.setVisible(true);
+        }
+
+        pnlGameOverButtons.setVisible(true);
         apples.clear();
         revalidate();
     }
@@ -142,15 +184,33 @@ public class SnakePanel extends JPanel implements KeyListener {
     }
 
     protected void setupRefreshRate(int rate) {
+        // prevent several timers running
+        if (timer != null && timer.isRunning()) {
+            timer.stop();
+        }
+
         timer = new Timer(rate, e -> {
             if (activeGame) {
                 snake.updateSnake(apples);
+
                 if (snake.appleEaten(apples)) {
                     Apple apple = snake.getEatenApple(apples);
+
                     if (apple != null) {
                         apple.spawnApple();
                     }
+
+                    int currScore = snake.getSnakeScore();
+                    lblCurrScore.setText("Current Score: " + currScore);
+
+                    // update high score label if high score
+                    String lblHighScoreText = lblHighScore.getText();
+                    int currHighScore = Integer.parseInt(lblHighScoreText.substring(lblHighScoreText.length() - 1));  // always int
+                    if (currScore > currHighScore) {
+                        lblHighScore.setText("High Score: " + currScore);
+                    }
                 }
+
                 if (snake.checkCollision()) {
                     gameOver();
                 } else {
@@ -166,7 +226,9 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        snake.keyPressed(e);
+        // pressing Enter starts a new game
+        if ((!activeGame) && (e.getKeyCode() == KeyEvent.VK_ENTER)) { startNewGame(); }
+        else { snake.keyPressed(e); }
     }
 
     @Override
@@ -176,11 +238,59 @@ public class SnakePanel extends JPanel implements KeyListener {
     public void keyTyped(KeyEvent e) {}
 
 
-    protected void addButtons() {
+    private void setupMenu() {
+        menu = new JPanel();
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
+        menu.setOpaque(false);
+
+        lblTitle = new JLabel("Snake");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 250));
+        lblTitle.setForeground(Color.GREEN);
+        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        menu.add(lblTitle);
+
+        menu.add(Box.createRigidArea(new Dimension(0, 30)));
+
+        controlsPanel = new ControlsPanel(this);
+        controlsPanel.setMaximumSize(controlsPanel.getPreferredSize());
+        controlsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        menu.add(controlsPanel);
+
+        add(menu, BorderLayout.CENTER);
+    }
+
+
+    private void addButtonsAndLabels() {
+        pnlScoreLabels = new JPanel();
+        pnlScoreLabels.setLayout(new FlowLayout());
+        pnlScoreLabels.setOpaque(false);
+        
+        lblHighScore = new JLabel("High Score: 0");
+        lblHighScore.setForeground(Color.WHITE);
+        pnlScoreLabels.add(lblHighScore);
+        pnlScoreLabels.add(Box.createRigidArea(new Dimension(20, 0)));
+        lblCurrScore = new JLabel("Current Score: 0");
+        lblCurrScore.setForeground(Color.WHITE);
+        pnlScoreLabels.add(lblCurrScore);
+        pnlScoreLabels.setMaximumSize(pnlScoreLabels.getPreferredSize());
+        add(pnlScoreLabels, BorderLayout.PAGE_START);
+
+        pnlGameOverButtons = new JPanel();
+        pnlGameOverButtons.setLayout(new FlowLayout());
+        pnlGameOverButtons.setOpaque(false);
+
         btnStartAgain = new JButton("Start Again?");
-        add(btnStartAgain);
+        pnlGameOverButtons.add(btnStartAgain);
+        pnlGameOverButtons.add(Box.createRigidArea(new Dimension(20, 0)));
         btnMenu = new JButton("Menu");
-        add(btnMenu);
+        pnlGameOverButtons.add(btnMenu);
+        pnlGameOverButtons.setMaximumSize(pnlGameOverButtons.getPreferredSize());
+        add(pnlGameOverButtons, BorderLayout.PAGE_END);
+
+        lblWin = new JLabel("You Win!");
+        lblWin.setFont(new Font("Arial", Font.BOLD, 100));
+        lblWin.setForeground(Color.YELLOW);
+        add(lblWin);
     }
 
     protected void addButtonListeners() {

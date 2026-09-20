@@ -11,9 +11,6 @@ public class SnakeWindow extends JFrame {
         setTitle("Snake Game");
         add(snakePanel, BorderLayout.CENTER);
 
-        // Maximise JFrame to fit entire screen
-        // setExtendedState(MAXIMIZED_BOTH);
-
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
