@@ -2,7 +2,6 @@ package snake;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.Toolkit;
 import java.awt.event.*;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -14,15 +13,16 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     protected static int SQUARE_LENGTH;
     protected static final int BORDER_SIZE = 20;
-    protected static int screenWidth = 1200;
-    protected static int screenHeight = 900;
+    protected static final int SCREEN_WIDTH = 1200;
+    protected static final int SCREEN_HEIGHT = 900;
 
     private boolean activeGame;
     private Timer timer;
     private Snake snake;
     private ArrayList<Apple> apples = new ArrayList<>();
     private HashMap<String, Integer> highScores = new HashMap<>();  // String part will be concatenation of 
-                                                                    // speed -> map size -> num apples
+                                                                    // speed -> map size -> num apples -> true/false (boolean obstacles)
+    private boolean obstacles;
 
     private JPanel menu;
     private ControlsPanel controlsPanel;
@@ -41,9 +41,9 @@ public class SnakePanel extends JPanel implements KeyListener {
 
     public SnakePanel() {
         // preferred panel size (screen width is the playing area and doesnt include borders)
-        setPreferredSize(new Dimension(screenWidth + 2*BORDER_SIZE, screenHeight + 2*BORDER_SIZE));
+        setPreferredSize(new Dimension(SCREEN_WIDTH + 2*BORDER_SIZE, SCREEN_HEIGHT + 2*BORDER_SIZE));
 
-        // Display GUI elements vertically (elements which are horizontal are contained in their own panel of a different layout)
+        // display GUI elements vertically (elements which are horizontal are contained in their own panel of a different layout)
         setLayout(new BorderLayout());
 
         // set up everything
@@ -86,6 +86,14 @@ public class SnakePanel extends JPanel implements KeyListener {
                 apple.drawApple(g2);
             }
         }
+
+        // draw obstacles if any
+        if (obstacles) {
+            g2.setColor(Color.GRAY);
+            for (Point obstacle : Obstacle.obstacleCoords) {
+                g.fillRect((int) obstacle.getX() + 2, (int) obstacle.getY() + 2, SQUARE_LENGTH - 4, SQUARE_LENGTH - 4);
+            }
+        }
     }
     
 
@@ -100,11 +108,12 @@ public class SnakePanel extends JPanel implements KeyListener {
         String speed = controlsPanel.getSpeed();
         String mapSize = controlsPanel.getMapSize();
         int numApples = controlsPanel.getNumApples();
+        obstacles = controlsPanel.getObstaclesEnabled();
 
         lblCurrScore.setText("Current Score: 0");
 
         // high score
-        String highScoreString = speed + mapSize + String.valueOf(numApples);
+        String highScoreString = speed + mapSize + String.valueOf(numApples) + String.valueOf(obstacles);
         Integer currHighScore = highScores.get(highScoreString);                        
         if (currHighScore != null) {
             lblHighScore.setText("High Score: " + currHighScore);
@@ -123,8 +132,12 @@ public class SnakePanel extends JPanel implements KeyListener {
         }
 
         snake.resetSnake();
+
+        if (obstacles) {
+            Obstacle.initiateObstacles(controlsPanel.getObstacleDifficulty());
+        }
         
-        Apple.resetAvailableSquares(numApples);
+        Apple.resetAvailableSquares(numApples, obstacles);
         for (Apple apple : apples) {
             apple.spawnApple();
         }
@@ -142,7 +155,7 @@ public class SnakePanel extends JPanel implements KeyListener {
 
         // check for highscore
         String highScoreString = controlsPanel.getSpeed() + controlsPanel.getMapSize() +
-                                    String.valueOf(controlsPanel.getNumApples());
+                                String.valueOf(controlsPanel.getNumApples() + String.valueOf(controlsPanel.getObstaclesEnabled()));
         Integer currHighScore = highScores.get(highScoreString);
         int score = snake.getSnakeScore();
         if (currHighScore == null || (score > currHighScore)) {
@@ -164,14 +177,14 @@ public class SnakePanel extends JPanel implements KeyListener {
         g.setColor(Color.BLACK);
 
         int currX = BORDER_SIZE - 1;
-        while (currX < screenWidth - BORDER_SIZE) {
-            g.fillRect(currX, BORDER_SIZE, 4, screenHeight - BORDER_SIZE);
+        while (currX < SCREEN_WIDTH - BORDER_SIZE) {
+            g.fillRect(currX, BORDER_SIZE, 4, SCREEN_HEIGHT - BORDER_SIZE);
             currX += SQUARE_LENGTH;
         }
 
         int currY = BORDER_SIZE - 1;
-        while (currY < screenHeight - BORDER_SIZE) {
-            g.fillRect(BORDER_SIZE, currY, screenWidth - BORDER_SIZE, 4);
+        while (currY < SCREEN_HEIGHT - BORDER_SIZE) {
+            g.fillRect(BORDER_SIZE, currY, SCREEN_WIDTH - BORDER_SIZE, 4);
             currY += SQUARE_LENGTH;
         }
     }
@@ -211,7 +224,7 @@ public class SnakePanel extends JPanel implements KeyListener {
                     }
                 }
 
-                if (snake.checkCollision()) {
+                if (snake.checkCollision(obstacles)) {
                     gameOver();
                 } else {
                     repaint();

@@ -9,7 +9,7 @@ public class Main {
     }
 
     public static void startGUI() {
-        // Start GUI
+        // start GUI
         SnakePanel snakePanel = new SnakePanel();
         SnakeWindow snakeWindow = new SnakeWindow(snakePanel);
         snakeWindow.setVisible(true);

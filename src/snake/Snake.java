@@ -76,13 +76,25 @@ public class Snake implements KeyListener {
     }
 
 
-    protected boolean checkCollision() {
-        return currentY < SnakePanel.BORDER_SIZE ||
-               currentY >= SnakePanel.screenHeight - SnakePanel.BORDER_SIZE ||
+    protected boolean checkCollision(boolean obstacles) {
+        if (!obstacles) {
+            return currentY < SnakePanel.BORDER_SIZE ||
+               currentY >= SnakePanel.SCREEN_HEIGHT - SnakePanel.BORDER_SIZE ||
                currentX < SnakePanel.BORDER_SIZE ||
-               currentX >= SnakePanel.screenWidth - SnakePanel.BORDER_SIZE ||
+               currentX >= SnakePanel.SCREEN_WIDTH - SnakePanel.BORDER_SIZE ||
                // self collision
                coords.subList(0, coords.size() - 1).contains(new Point(currentX, currentY));
+        } else {
+            Point curr = new Point(currentX, currentY);
+            return currentY < SnakePanel.BORDER_SIZE ||
+               currentY >= SnakePanel.SCREEN_HEIGHT - SnakePanel.BORDER_SIZE ||
+               currentX < SnakePanel.BORDER_SIZE ||
+               currentX >= SnakePanel.SCREEN_WIDTH - SnakePanel.BORDER_SIZE ||
+               // self collision
+               coords.subList(0, coords.size() - 1).contains(curr) ||
+               // obstacles
+               Obstacle.obstacleCoords.contains(curr);
+        }
     }
 
 

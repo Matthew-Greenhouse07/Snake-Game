@@ -8,17 +8,23 @@ import java.awt.Color;
 
 public class ControlsPanel extends JPanel {
 
-    private ButtonGroup speedButtons = new ButtonGroup();
-    private JRadioButton normalSpeedButton = new JRadioButton("Normal");
-    private JRadioButton fastSpeedButton = new JRadioButton("Fast");
-    private JRadioButton slowSpeedButton = new JRadioButton("Slow");
+    private ButtonGroup speedButtons;
+    private JRadioButton normalSpeedButton;
+    private JRadioButton fastSpeedButton;
+    private JRadioButton slowSpeedButton;
 
-    private ButtonGroup mapSizeButtons = new ButtonGroup();
-    private JRadioButton normalSizeButton = new JRadioButton("Normal");
-    private JRadioButton smallSizeButton = new JRadioButton("Small");
-    private JRadioButton largeSizeButton = new JRadioButton("Large");
+    private ButtonGroup mapSizeButtons;
+    private JRadioButton normalSizeButton;
+    private JRadioButton smallSizeButton;
+    private JRadioButton largeSizeButton;
 
     private JSlider numApplesSlider;
+
+    private JToggleButton enableObstaclesButton;
+    private ButtonGroup obstacleModeButtons;
+    private JRadioButton lowObstaclesButton;
+    private JRadioButton mediumObstaclesButton;
+    private JRadioButton highObstaclesButton;
 
     private JButton btnStartGame;
 
@@ -26,6 +32,7 @@ public class ControlsPanel extends JPanel {
 
 
     public ControlsPanel(SnakePanel snakePanel) {
+        initialiseGUIElements();
         setupGUIElements(snakePanel);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Color.LIGHT_GRAY);
@@ -36,9 +43,36 @@ public class ControlsPanel extends JPanel {
         add(Box.createRigidArea(new Dimension(0, 20)));
         add(createGroupedButtons(normalSizeButton, smallSizeButton, largeSizeButton));
         add(Box.createRigidArea(new Dimension(0, 30)));
+
         add(createLabeledSlider("Number of apples: ", numApplesSlider));
         add(Box.createRigidArea(new Dimension(0, 30)));
+
+        add(createLabeledToggleableButtons("Obstacles enabled: ", enableObstaclesButton,
+                    lowObstaclesButton, mediumObstaclesButton, highObstaclesButton));
+        add(Box.createRigidArea(new Dimension(0, 30)));
+
         add(btnStartGame);
+    }
+
+
+    private void initialiseGUIElements() {
+        speedButtons = new ButtonGroup();
+        normalSpeedButton = new JRadioButton("Normal");
+        fastSpeedButton = new JRadioButton("Fast");
+        slowSpeedButton = new JRadioButton("Slow");
+
+        mapSizeButtons = new ButtonGroup();
+        normalSizeButton = new JRadioButton("Normal");
+        smallSizeButton = new JRadioButton("Small");
+        largeSizeButton = new JRadioButton("Large");
+
+        numApplesSlider = new JSlider(1, 5, 1);
+
+        enableObstaclesButton = new JToggleButton("Off", false);
+        obstacleModeButtons = new ButtonGroup();
+        lowObstaclesButton = new JRadioButton("Low");
+        mediumObstaclesButton = new JRadioButton("Medium");
+        highObstaclesButton = new JRadioButton("High");
     }
 
 
@@ -53,12 +87,11 @@ public class ControlsPanel extends JPanel {
         mapSizeButtons.add(largeSizeButton);
         normalSizeButton.setSelected(true);
 
-        numApplesSlider = new JSlider(1, 5, 1);
         numApplesSlider.setMajorTickSpacing(1);
         numApplesSlider.setPaintTicks(true);
         numApplesSlider.setPaintLabels(true);
 
-        // button and listener
+        // start game button and listener
         btnStartGame = new JButton("Start Game");
         btnStartGame.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnStartGame.addActionListener(e -> { snakePanel.startNewGame(); });
@@ -80,6 +113,15 @@ public class ControlsPanel extends JPanel {
         smallSizeButton.setOpaque(false);
         largeSizeButton.setOpaque(false);
         numApplesSlider.setOpaque(false);
+        lowObstaclesButton.setOpaque(false);
+        mediumObstaclesButton.setOpaque(false);
+        highObstaclesButton.setOpaque(false);
+
+        // obstacle toggleable button and options
+        obstacleModeButtons.add(lowObstaclesButton);
+        obstacleModeButtons.add(mediumObstaclesButton);
+        obstacleModeButtons.add(highObstaclesButton);
+        lowObstaclesButton.setSelected(true);
     }
 
 
@@ -94,6 +136,46 @@ public class ControlsPanel extends JPanel {
         panel.setOpaque(false);
         return panel;
     }
+
+    private JPanel createLabeledToggleableButtons(String label, JToggleButton toggle,
+                    JRadioButton button1, JRadioButton button2, JRadioButton button3) {
+
+        JLabel buttonLabel = new JLabel(label);
+        buttonLabel.setFont(font);
+        JPanel buttons = createGroupedButtons(button1, button2, button3);
+
+        JPanel toggleableButtonsPanel = new JPanel();
+        toggleableButtonsPanel.setLayout(new BoxLayout(toggleableButtonsPanel, BoxLayout.Y_AXIS));
+        toggleableButtonsPanel.add(toggle);
+        toggleableButtonsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        toggleableButtonsPanel.add(buttons);
+        toggleableButtonsPanel.setBackground(new Color(200, 200, 200));
+        toggleableButtonsPanel.setMaximumSize(toggleableButtonsPanel.getPreferredSize());
+
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(buttonLabel);
+        panel.add(Box.createRigidArea(new Dimension(20, 0)));
+        panel.add(toggleableButtonsPanel);
+        panel.setOpaque(false);
+        panel.setMaximumSize(panel.getPreferredSize());
+
+        // disable radio buttons by default (toggle button enables them)
+        button1.setEnabled(false);
+        button2.setEnabled(false);
+        button3.setEnabled(false);
+
+        toggle.addActionListener(e -> {
+            boolean enabled = toggle.isSelected();
+            button1.setEnabled(enabled);
+            button2.setEnabled(enabled);
+            button3.setEnabled(enabled);
+
+            if (enabled) { toggle.setText("On"); }
+            else { toggle.setText("Off"); }
+        });
+
+        return panel;
+    }
     
 
     private JPanel createLabeledSlider(String label, JSlider slider) {
@@ -102,7 +184,6 @@ public class ControlsPanel extends JPanel {
         sliderLabel.setFont(font);
         panel.add(sliderLabel, BorderLayout.NORTH);
         panel.add(slider, BorderLayout.CENTER);
-        // panel.setMaximumSize(panel.getPreferredSize());
         panel.setOpaque(false);
         return panel;
     }
@@ -124,6 +205,17 @@ public class ControlsPanel extends JPanel {
 
     protected int getNumApples() {
         return numApplesSlider.getValue();
+    }
+
+
+    protected boolean getObstaclesEnabled() {
+        return enableObstaclesButton.isSelected();
+    }
+
+    protected String getObstacleDifficulty() {
+        if (lowObstaclesButton.isSelected()) { return "low"; }
+        else if (mediumObstaclesButton.isSelected()) { return "medium"; }
+        else { return "high"; }
     }
 
 }

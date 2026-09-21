@@ -7,7 +7,7 @@ import java.awt.Color;
 public class SnakeWindow extends JFrame {
 
     public SnakeWindow(SnakePanel snakePanel) {
-        // Create Snake Window
+        // create Snake Window
         setTitle("Snake Game");
         add(snakePanel, BorderLayout.CENTER);
 

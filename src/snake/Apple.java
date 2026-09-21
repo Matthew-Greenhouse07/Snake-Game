@@ -50,7 +50,7 @@ public class Apple {
     }
 
 
-    protected static void resetAvailableSquares(int numberOfApples) {
+    protected static void resetAvailableSquares(int numberOfApples, boolean obstacles) {
         // reset these static values as well at beginning of game
         numApples = numberOfApples;
         finalApplesEaten = 0;
@@ -58,14 +58,14 @@ public class Apple {
 
         availableSquares.clear();
 
-        // Initialise availableSquares array
+        // initialise availableSquares array
         int currX = SnakePanel.BORDER_SIZE;
         int currY;
 
-        while (currX < SnakePanel.screenWidth - SnakePanel.BORDER_SIZE) {
+        while (currX < SnakePanel.SCREEN_WIDTH - SnakePanel.BORDER_SIZE) {
             currY = SnakePanel.BORDER_SIZE;
 
-            while (currY < SnakePanel.screenHeight - SnakePanel.BORDER_SIZE) {
+            while (currY < SnakePanel.SCREEN_HEIGHT - SnakePanel.BORDER_SIZE) {
                 availableSquares.add(new Point(currX, currY));
                 currY += SnakePanel.SQUARE_LENGTH;
             }
@@ -77,6 +77,13 @@ public class Apple {
         availableSquares.remove(new Point(SnakePanel.BORDER_SIZE, SnakePanel.BORDER_SIZE));
         availableSquares.remove(new Point(SnakePanel.BORDER_SIZE + SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
         availableSquares.remove(new Point(SnakePanel.BORDER_SIZE + 2*SnakePanel.SQUARE_LENGTH, SnakePanel.BORDER_SIZE));
+
+        if (obstacles) {
+            // remove obstacle coords
+            for (Point obstacle : Obstacle.obstacleCoords) {
+                availableSquares.remove(obstacle);
+            }
+        }
     }
 
 
